@@ -1,25 +1,25 @@
 import json
 import os
 
-with open("coco_ball_nao/bbox.json") as f:
+with open("data/coco_ball_nao/bbox.json") as f:
     data = json.load(f)
 
 image_width = data["images"][0]["width"]
 image_height = data["images"][0]["height"]
 
-if not os.path.exists("coco_ball_nao/txtannotations"):
-    os.mkdir("coco_ball_nao/txtannotations")
+if not os.path.exists("data/coco_ball_nao/labels"):
+    os.mkdir("data/coco_ball_nao/labels")
 
 images = {}
 for image in data["images"]:
     images[image["id"]] = image["file_name"]
     image_name = image["file_name"].split(".")[0]
-    open(f"coco_ball_nao/txtannotations/{image_name}.txt", "w")
+    open(f"data/coco_ball_nao/labels/{image_name}.txt", "w")
 
 for annotation in data["annotations"]:
     image_id = annotation["image_id"]
     image_name = images[image_id].split(".")[0]
-    with open(f"coco_ball_nao/txtannotations/{image_name}.txt", "w") as f:
+    with open(f"data/coco_ball_nao/labels/{image_name}.txt", "w") as f:
         bbox1 = annotation['bbox'][0] / image_width
         bbox2 = annotation['bbox'][1] / image_height
         bbox3 = annotation['bbox'][2] / image_width
