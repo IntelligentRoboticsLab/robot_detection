@@ -6,3 +6,4 @@ data/**/images
 data/**/labels
 new_lightning_logs
 new_logs
+data3
