@@ -5,19 +5,20 @@ import lightning.pytorch as pl
 
 from models import JetNet, SingleShotDetectorLoss, ObjectDetectionTask
 from lightning.pytorch.loggers import TensorBoardLogger
+torch.manual_seed(0)
 
 if __name__ == "__main__":
-    LEARNING_RATE = 2e-3
+    LEARNING_RATE = 0.01
     ALPHA = 2.0
     NUM_CLASSES = 1
     DEFAULT_SCALINGS = torch.tensor(
         [
             [0.0788409 , 0.08730039],
-       [0.12153658, 0.20424528],
-       [0.2331543 , 0.25296658],
-       [0.36146814, 0.49899086],
-       [0.39320916, 0.9054488 ],
-       [0.97875   , 0.9608333 ],
+            [0.12153658, 0.20424528],
+            [0.2331543 , 0.25296658],
+            [0.36146814, 0.49899086],
+            [0.39320916, 0.9054488 ],
+            [0.97875   , 0.9608333 ],
         ]
     )
     encoder = Encoder(DEFAULT_SCALINGS, NUM_CLASSES)
