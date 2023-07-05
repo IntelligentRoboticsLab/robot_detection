@@ -11,6 +11,9 @@ import shutil
 
 # function to create subfolders for both train and validation splits
 def create_subfolders(parent_folder, subfolders):
+    if not os.path.exists(parent_folder):
+        os.mkdir(parent_folder)
+
     for subfolder in subfolders:
         path = os.path.join(parent_folder, subfolder)
         if not os.path.exists(path):
@@ -63,6 +66,8 @@ for annotation in category_annotations:
     with open(f"data/coco_nao/{SPLIT_DIR}/labels/{image_name}.txt", "w") as f:
 
         # convert the COCO format annotations into YOLO format
+        # source:
+        # https://haobin-tan.netlify.app/ai/computer-vision/object-detection/coco-json-to-yolo-txt/
         x_tl, y_tl, w, h = annotation['bbox']
 
         dw = 1.0 / img_width
