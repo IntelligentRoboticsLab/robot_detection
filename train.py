@@ -5,28 +5,27 @@ import lightning.pytorch as pl
 
 from models import JetNet, SingleShotDetectorLoss, ObjectDetectionTask
 from lightning.pytorch.loggers import TensorBoardLogger
-torch.manual_seed(0)
 
 if __name__ == "__main__":
-    LEARNING_RATE = 0.003259169815072302
-    ALPHA = 0.20364365473105459
+    LEARNING_RATE = 1e-1
+    ALPHA = 2.0
     NUM_CLASSES = 1
     DEFAULT_SCALINGS = torch.tensor(
         [
-            [0.0788409 , 0.08730039],
-            [0.12153658, 0.20424528],
-            [0.2331543 , 0.25296658],
-            [0.36146814, 0.49899086],
-            [0.39320916, 0.9054488 ],
-            [0.97875   , 0.9608333 ],
+            [0.06549374, 0.12928654],
+            [0.11965626, 0.26605093],
+            [0.20708716, 0.38876095],
+            [0.31018215, 0.47485098],
+            [0.415882, 0.8048184],
+            [0.7293086, 0.8216225],
         ]
     )
     encoder = Encoder(DEFAULT_SCALINGS, NUM_CLASSES)
     model = JetNet(NUM_CLASSES, DEFAULT_SCALINGS.shape[0])
     loss = SingleShotDetectorLoss(ALPHA)
-    data_module = RoboEireanDataModule("data/raw/", encoder, 5)
+    data_module = RoboEireanDataModule("data/raw/", encoder, 128)
     data_module.setup("fit")
     task = ObjectDetectionTask(model, loss, encoder, LEARNING_RATE)
     logger = TensorBoardLogger(save_dir="new_logs")
-    trainer = pl.Trainer(max_epochs=100, logger=logger)
+    trainer = pl.Trainer(max_epochs=10, logger=logger)
     trainer.fit(model=task, datamodule=data_module)

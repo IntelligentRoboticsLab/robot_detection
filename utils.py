@@ -39,7 +39,7 @@ def convert_to_absolute_coordinates(
 
     bounding_boxes = bounding_boxes * torch.tensor(
         [image_size[1], image_size[0], image_size[1], image_size[0]]
-    ).to("cuda:0")
+    )
     bounding_boxes = torch.concat(
         (
             bounding_boxes[:, :, :2] - bounding_boxes[:, :, 2:] / 2,
@@ -115,9 +115,6 @@ class Encoder:
         encoded_target_boxes = torch.zeros(
             (self.default_boxes_xy_wh.size(0), NUM_BOX_PARAMETERS)
         )
-        selected_target_boxes = selected_target_boxes.to("cuda:0")
-        selected_default_boxes = selected_default_boxes.to("cuda:0")
-        encoded_target_boxes = encoded_target_boxes.to("cuda:0")
         encoded_target_boxes[is_object, 0:2] = (
             selected_target_boxes[:, 0:2] - selected_default_boxes[:, 0:2]
         ) / selected_default_boxes[:, 2:4]
@@ -135,22 +132,15 @@ class Encoder:
         - encoded_classes: (batch_size, num_default_boxes)
         """
         assert bounding_boxes.dim() == 3
-        decoded_boxes = torch.zeros_like(bounding_boxes)#.to("cuda:0")
-        self.default_boxes_xy_wh = self.default_boxes_xy_wh.to("cuda:0")
-        # bounding_boxes = bounding_boxes.to("cuda:0")
-
-        cloned_decoded_boxes = decoded_boxes.clone()
-        self.cloned_default_boxes_xy_wh = self.default_boxes_xy_wh.clone()
-        cloned_bounding_boxes = bounding_boxes.clone()
-
-        cloned_decoded_boxes[..., 0:2] = (
-            self.cloned_default_boxes_xy_wh[:, 2:4] * (cloned_bounding_boxes[..., 0:2])
-            + self.cloned_default_boxes_xy_wh[:, 0:2]
+        decoded_boxes = torch.zeros_like(bounding_boxes)
+        decoded_boxes[..., 0:2] = (
+            self.default_boxes_xy_wh[:, 2:4] * (bounding_boxes[..., 0:2])
+            + self.default_boxes_xy_wh[:, 0:2]
         )
-        cloned_decoded_boxes[..., 2:4] = self.cloned_default_boxes_xy_wh[:, 2:4] * torch.exp(
-            cloned_bounding_boxes[..., 2:4]
+        decoded_boxes[..., 2:4] = self.default_boxes_xy_wh[:, 2:4] * torch.exp(
+            bounding_boxes[..., 2:4]
         )
-        return cloned_decoded_boxes
+        return decoded_boxes
 
     def _default_boxes(self, type: str):
         assert type in ["xywh", "tlbr"]

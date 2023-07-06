@@ -83,7 +83,7 @@ class RoboEireanDataModule(pl.LightningDataModule):
         self,
         data_path: str,
         encoder: utils.Encoder,
-        batch_size: int = 5,
+        batch_size: int = 32,
     ):
         super().__init__()
         self.data_path = data_path
@@ -118,12 +118,12 @@ class RoboEireanDataModule(pl.LightningDataModule):
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(
-            self.train_dataset, batch_size=self.batch_size, shuffle=True
+            self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=8
         )
 
     def val_dataloader(self):
         return torch.utils.data.DataLoader(
-            self.val_dataset, batch_size=self.batch_size, shuffle=False
+            self.val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=8
         )
 
 
