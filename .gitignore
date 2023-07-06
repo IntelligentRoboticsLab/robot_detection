@@ -7,3 +7,5 @@ data/**/images
 data/**/labels
 data/**/txtannotations
 data3
+*.43
+*.42
