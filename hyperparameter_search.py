@@ -72,7 +72,7 @@ def objective(trial: optuna.trial.Trial):
         ],
         logger=tensorboard_logger,
         enable_model_summary=False,
-        accelerator="cpu",
+        accelerator="gpu"
     )
     initial_performance = trainer.validate(task, data_module, verbose=False)[0][
         "validation/mean_average_precision"

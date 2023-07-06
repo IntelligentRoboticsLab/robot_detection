@@ -135,16 +135,22 @@ class Encoder:
         - encoded_classes: (batch_size, num_default_boxes)
         """
         assert bounding_boxes.dim() == 3
-        decoded_boxes = torch.zeros_like(bounding_boxes)
+        decoded_boxes = torch.zeros_like(bounding_boxes)#.to("cuda:0")
         self.default_boxes_xy_wh = self.default_boxes_xy_wh.to("cuda:0")
-        decoded_boxes[..., 0:2] = (
-            self.default_boxes_xy_wh[:, 2:4] * (bounding_boxes[..., 0:2])
-            + self.default_boxes_xy_wh[:, 0:2]
+        # bounding_boxes = bounding_boxes.to("cuda:0")
+
+        cloned_decoded_boxes = decoded_boxes.clone()
+        self.cloned_default_boxes_xy_wh = self.default_boxes_xy_wh.clone()
+        cloned_bounding_boxes = bounding_boxes.clone()
+
+        cloned_decoded_boxes[..., 0:2] = (
+            self.cloned_default_boxes_xy_wh[:, 2:4] * (cloned_bounding_boxes[..., 0:2])
+            + self.cloned_default_boxes_xy_wh[:, 0:2]
         )
-        decoded_boxes[..., 2:4] = self.default_boxes_xy_wh[:, 2:4] * torch.exp(
-            bounding_boxes[..., 2:4]
+        cloned_decoded_boxes[..., 2:4] = self.cloned_default_boxes_xy_wh[:, 2:4] * torch.exp(
+            cloned_bounding_boxes[..., 2:4]
         )
-        return decoded_boxes
+        return cloned_decoded_boxes
 
     def _default_boxes(self, type: str):
         assert type in ["xywh", "tlbr"]

@@ -83,7 +83,7 @@ class RoboEireanDataModule(pl.LightningDataModule):
         self,
         data_path: str,
         encoder: utils.Encoder,
-        batch_size: int = 32,
+        batch_size: int = 5,
     ):
         super().__init__()
         self.data_path = data_path
