@@ -26,6 +26,9 @@ if __name__ == "__main__":
     data_module = RoboEireanDataModule("data/raw/", encoder, 128)
     data_module.setup("fit")
     task = ObjectDetectionTask(model, loss, encoder, LEARNING_RATE)
+    
+    # view logs with tensorboard --logdir new_logs
+    
     logger = TensorBoardLogger(save_dir="new_logs")
-    trainer = pl.Trainer(max_epochs=10, logger=logger)
+    trainer = pl.Trainer(max_epochs=2, logger=logger)
     trainer.fit(model=task, datamodule=data_module)

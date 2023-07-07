@@ -23,6 +23,7 @@ class ObjectDetectionTask(lightning.LightningModule):
         self.learning_rate = learning_rate
         self.mean_average_precision = MeanAveragePrecision()
 
+
     def _shared_eval_step(self, batch):
         images, encoded_target_bounding_boxes, encoded_target_classes = batch
         (
