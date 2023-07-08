@@ -124,7 +124,7 @@ class ObjectDetectionTask(lightning.LightningModule):
         return torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
 
 
-class SingleShotDetectorLoss(nn.Module):
+class SingleShotDetector(nn.Module):
     def __init__(self, alpha: float = 1.0):
         super().__init__()
         self.alpha = alpha

@@ -3,7 +3,7 @@ import torch
 from datasets import RoboEireanDataModule
 import lightning.pytorch as pl
 
-from models import JetNet, SingleShotDetectorLoss, ObjectDetectionTask
+from models import JetNet, SingleShotDetector, ObjectDetectionTask
 from lightning.pytorch.loggers import TensorBoardLogger
 
 if __name__ == "__main__":
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     )
     encoder = Encoder(DEFAULT_SCALINGS, NUM_CLASSES)
     model = JetNet(NUM_CLASSES, DEFAULT_SCALINGS.shape[0])
-    loss = SingleShotDetectorLoss(ALPHA)
+    loss = SingleShotDetector(ALPHA)
     data_module = RoboEireanDataModule("data/raw/", encoder, 128)
     data_module.setup("fit")
     task = ObjectDetectionTask(model, loss, encoder, LEARNING_RATE)
