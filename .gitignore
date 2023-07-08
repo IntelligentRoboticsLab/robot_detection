@@ -1,4 +1,5 @@
 .venv
+env
 players_deeptector.h5
 __pycache__
 lightning_logs
