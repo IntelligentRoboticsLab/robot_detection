@@ -71,8 +71,8 @@ class ObjectDetectionTask(lightning.LightningModule):
             )
         ]
         self.mean_average_precision(
-            predictions,
-            targets,
+        predictions,
+        targets,
         )
         return (
             total_loss,
@@ -249,6 +249,10 @@ class JetNet(lightning.LightningModule):
         num_default_scalings: int,
     ) -> None:
         super().__init__()
+        # NOTE: Dont see mean average precisions
+        # NOTE: dont see learning rate
+        # NOTE: Dont see learning rate
+        
         self.num_classes = num_classes
         self.num_default_boxes = num_default_scalings
 
@@ -309,9 +313,9 @@ class JetNet(lightning.LightningModule):
             )
         )
         predicted_bounding_boxes = model_output[
-            ..., 0 : self.NUM_BOX_PARAMETERS
+            :,:,:,:, 0 : self.NUM_BOX_PARAMETERS
         ].reshape((batch_size, -1, self.NUM_BOX_PARAMETERS))
-        predicted_class_logits = model_output[..., self.NUM_BOX_PARAMETERS :].reshape(
+        predicted_class_logits = model_output[:,:,:,:, self.NUM_BOX_PARAMETERS :].reshape(
             (batch_size, -1, self.num_classes + 1)
         )
         return predicted_bounding_boxes, predicted_class_logits

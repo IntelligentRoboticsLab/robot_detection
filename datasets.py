@@ -51,6 +51,7 @@ class RoboEireanData(torch.utils.data.Dataset):
         target_bounding_boxes_list = []
         target_classes_list = []
 
+        # for each bounding box in the label file, parse the class and bounding box
         for label_string in label_strings:
             parsed_target_class = int(label_string[0])
             if self.CLASSES[parsed_target_class] in self.selected_classes:
@@ -61,18 +62,26 @@ class RoboEireanData(torch.utils.data.Dataset):
                     np.fromstring(label_string[1:], sep=" ", dtype=np.float32)
                 )
 
+        # convert the target bounding boxes and classes to tensors
         target_bounding_boxes = torch.tensor(np.array(target_bounding_boxes_list))
         target_classes = (
             torch.tensor(np.array(target_classes_list), dtype=torch.long) + 1
         )
 
+        # apply the bounding box transforms
         for transform in self.bounding_box_transforms:
             target_bounding_boxes, target_classes = transform(
                 target_bounding_boxes, target_classes
             )
+            
+        # apply the image transforms
         if self.image_transforms:
-            image = self.image_transforms(image)
-        return image, target_bounding_boxes, target_classes
+            transformed_image = self.image_transforms(image)
+        
+        raw_image_np = np.array(image)
+        image_tensor = torch.from_numpy(raw_image_np)
+            
+        return transformed_image, image_tensor, target_bounding_boxes, target_classes
 
     def __len__(self):
         return len(self.images)
