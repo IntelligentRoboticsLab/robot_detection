@@ -30,31 +30,46 @@ class RoboEireanData(torch.utils.data.Dataset):
         image_transforms=None,
         bounding_box_transforms=None,
     ) -> None:
+        
+        # check that the selected classes are valid
         assert set(selected_classes) <= set(self.CLASSES)
+        
+        # set the transformations to apply on images and bounding boxes
         self.image_transforms = image_transforms
         self.bounding_box_transforms = bounding_box_transforms
+ 
         self.data_path = data_path
         self.selected_classes = selected_classes
 
+        # get the images and labels as list of filenames
         self.images = sorted(os.listdir(os.path.join(data_path, "images")))
         self.labels = sorted(os.listdir(os.path.join(data_path, "labels")))
 
     def __getitem__(self, idx):
+        # check that the image and label filenames match
         assert self.images[idx][:-3] == self.labels[idx][:-3]
+        
+        # get the image and label path of the current index
         image_path = os.path.join(self.data_path, "images", self.images[idx])
         label_path = os.path.join(self.data_path, "labels", self.labels[idx])
 
+        # open the image and read the label file
         image = Image.open(image_path)
         with open(label_path) as f:
             label_strings = f.read().splitlines()
 
+        # initialize the target bounding boxes and classes
         target_bounding_boxes_list = []
         target_classes_list = []
-
-        # for each bounding box in the label file, parse the class and bounding box
+        
+        # parse the label strings
         for label_string in label_strings:
+            # get the class of the current label
             parsed_target_class = int(label_string[0])
+            
+            # check if the class is in the selected classes
             if self.CLASSES[parsed_target_class] in self.selected_classes:
+                # append the class and bounding box to the target lists
                 target_classes_list.append(
                     self.selected_classes.index(self.CLASSES[parsed_target_class])
                 )
@@ -78,6 +93,7 @@ class RoboEireanData(torch.utils.data.Dataset):
         if self.image_transforms:
             transformed_image = self.image_transforms(image)
         
+        # convert the image to a tensor to visualize the original image
         raw_image_np = np.array(image)
         image_tensor = torch.from_numpy(raw_image_np)
             
