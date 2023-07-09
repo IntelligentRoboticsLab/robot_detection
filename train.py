@@ -30,5 +30,5 @@ if __name__ == "__main__":
     # view logs with tensorboard --logdir new_logs
     
     logger = TensorBoardLogger(save_dir="new_logs")
-    trainer = pl.Trainer(max_epochs=5, logger=logger)
+    trainer = pl.Trainer(max_epochs=20, logger=logger)
     trainer.fit(model=task, datamodule=data_module)

@@ -39,7 +39,7 @@ def convert_to_absolute_coordinates(
 
     bounding_boxes = bounding_boxes * torch.tensor(
         [image_size[1], image_size[0], image_size[1], image_size[0]]
-    )
+    ) .to("cuda:0")
     bounding_boxes = torch.concat(
         (
             bounding_boxes[:, :, :2] - bounding_boxes[:, :, 2:] / 2,
@@ -78,7 +78,6 @@ class Encoder:
         # Select the default box with the highest IoU and with IoU higher than the threshold value
         ious = intersection_over_union(target_boxes_tl_br, self.default_boxes_tl_br)
         _, best_dbox_idx = ious.max(dim=1)
-
         masked_ious = (
             torch.logical_or(
                 (
@@ -89,7 +88,6 @@ class Encoder:
             )
             * ious
         )
-
         # Select the target box with the highest IoU for each default box
         best_value, best_idx = masked_ious.max(dim=0)
 
@@ -106,8 +104,6 @@ class Encoder:
             self.default_boxes_xy_wh.size(0), dtype=torch.long
         )
 
-
-
         encoded_target_classes[is_object] = target_classes[
             best_idx[is_object]
         ].flatten()
@@ -119,6 +115,13 @@ class Encoder:
         encoded_target_boxes = torch.zeros(
             (self.default_boxes_xy_wh.size(0), NUM_BOX_PARAMETERS)
         )
+        selected_target_boxes = selected_target_boxes.to("cuda:0")
+        selected_default_boxes = selected_default_boxes.to("cuda:0")
+        encoded_target_boxes = encoded_target_boxes.to("cuda:0")
+
+        encoded_target_boxes = encoded_target_boxes.double()
+        selected_default_boxes = selected_default_boxes.double()
+
         encoded_target_boxes[is_object, 0:2] = (
             selected_target_boxes[:, 0:2] - selected_default_boxes[:, 0:2]
         ) / selected_default_boxes[:, 2:4]
@@ -137,6 +140,7 @@ class Encoder:
         """
         assert bounding_boxes.dim() == 3
         decoded_boxes = torch.zeros_like(bounding_boxes)
+        self.default_boxes_xy_wh = self.default_boxes_xy_wh.to("cuda:0")
         decoded_boxes[..., 0:2] = (
             self.default_boxes_xy_wh[:, 2:4] * (bounding_boxes[..., 0:2])
             + self.default_boxes_xy_wh[:, 0:2]
@@ -214,4 +218,4 @@ def intersection_over_union(
 
 def calculate_predicted_classes(predicted_class_logits: torch.Tensor) -> torch.Tensor:
     class_probabilities = F.softmax(predicted_class_logits, dim=-1)
-    return torch.argmax(class_probabilities, dim=-1), class_probabilities
+    return torch.argmax(class_probabilities, dim=-1)
