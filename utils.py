@@ -78,6 +78,7 @@ class Encoder:
         # Select the default box with the highest IoU and with IoU higher than the threshold value
         ious = intersection_over_union(target_boxes_tl_br, self.default_boxes_tl_br)
         _, best_dbox_idx = ious.max(dim=1)
+
         masked_ious = (
             torch.logical_or(
                 (
@@ -88,6 +89,7 @@ class Encoder:
             )
             * ious
         )
+
         # Select the target box with the highest IoU for each default box
         best_value, best_idx = masked_ious.max(dim=0)
 
@@ -103,6 +105,8 @@ class Encoder:
         encoded_target_classes = torch.zeros(
             self.default_boxes_xy_wh.size(0), dtype=torch.long
         )
+
+
 
         encoded_target_classes[is_object] = target_classes[
             best_idx[is_object]
@@ -210,4 +214,4 @@ def intersection_over_union(
 
 def calculate_predicted_classes(predicted_class_logits: torch.Tensor) -> torch.Tensor:
     class_probabilities = F.softmax(predicted_class_logits, dim=-1)
-    return torch.argmax(class_probabilities, dim=-1)
+    return torch.argmax(class_probabilities, dim=-1), class_probabilities

@@ -4,6 +4,7 @@ import torch.nn.functional as F
 
 import lightning
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
+from torchmetrics.classification import MulticlassAccuracy
 import utils
 
 
@@ -55,6 +56,8 @@ class ObjectDetectionTask(lightning.LightningModule):
         _, _, num_classes = encoded_predicted_class_logits.shape
         predicted_class_scores = F.softmax(encoded_predicted_class_logits, dim=2)
         predicted_class = predicted_class_scores.argmax(dim=2)
+
+        accuracy = MulticlassAccuracy(num_classes=num_classes, accuracy = None)
 
         predictions = [
             dict(
