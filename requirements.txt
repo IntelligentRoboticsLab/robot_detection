@@ -5,3 +5,5 @@ torchvision
 torchmetrics
 pymysql
 tensorboard
+matplotlib
+pydantic==1.10.11 # fixes import error in lightning on mac, and is already install for linux
