@@ -149,6 +149,9 @@ class MultiClassJetNet(pl.LightningModule):
             accuracy = self.accuracy(
                 predicted_class_logits, encoded_target_classes.flatten()
             )
+        # print(predicted_class_logits)
+        # print(encoded_target_classes)
+        # print("--------------")
         self.log("train/accuracy/no_object", accuracy[0])
         self.log(
             f"train/accuracy/robot",

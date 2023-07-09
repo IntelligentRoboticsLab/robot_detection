@@ -43,7 +43,7 @@ class RoboEireanData(torch.utils.data.Dataset):
         assert self.images[idx][:-3] == self.labels[idx][:-3]
         image_path = os.path.join(self.data_path, "images", self.images[idx])
         label_path = os.path.join(self.data_path, "labels", self.labels[idx])
-        image = Image.open(image_path) / 255
+        image = Image.open(image_path)
         label_strings = open(label_path).read().splitlines()
         target_bounding_boxes = []
         target_classes = []
@@ -63,7 +63,7 @@ class RoboEireanData(torch.utils.data.Dataset):
             target_bounding_boxes = self.bounding_box_transforms(target_bounding_boxes)
         if self.image_transforms:
             image = self.image_transforms(image)
-        return image, target_bounding_boxes, target_classes
+        return image, target_bounding_boxes, target_classes, image_path
 
     def __len__(self):
         return len(self.images)
@@ -90,18 +90,18 @@ class RoboEireanDataWithEncoder(torch.utils.data.Dataset):
         bounding_box_transforms=None,
     ) -> None:
         self.dataset = RoboEireanData(
-            data_path, selected_classes, image_transforms, bounding_box_transforms
+            data_path, selected_classes, image_transforms, bounding_box_transforms,
         )
         self.encoder = encoder
 
     def __getitem__(self, idx):
-        image, target_bounding_boxes, target_classes = self.dataset[idx]
+        image, target_bounding_boxes, target_classes, image_path = self.dataset[idx]
         (
             encoded_bounding_boxes,
             target_mask,
             target_classes,
         ) = self.encoder.apply(target_bounding_boxes, target_classes)
-        return image, encoded_bounding_boxes, target_mask, target_classes
+        return image, encoded_bounding_boxes, target_mask, target_classes, image_path
 
     def __len__(self):
         return len(self.dataset)

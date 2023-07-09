@@ -90,6 +90,11 @@ class Encoder:
         encoded_target_boxes = torch.zeros(
             (self.default_boxes_xy_wh.size(0), NUM_BOX_PARAMETERS)
         )
+
+        selected_default_boxes = selected_default_boxes.type(torch.DoubleTensor)
+        encoded_target_boxes = encoded_target_boxes.type(torch.DoubleTensor)
+        selected_target_boxes = selected_target_boxes.type(torch.DoubleTensor)
+
         encoded_target_boxes[is_object, 0:2] = (
             selected_target_boxes[:, 0:2] - selected_default_boxes[:, 0:2]
         ) / selected_default_boxes[:, 2:4]
@@ -188,4 +193,4 @@ def intersection_over_union(
 
 def calculate_predicted_classes(predicted_class_logits: torch.Tensor) -> torch.Tensor:
     class_probabilities = F.softmax(predicted_class_logits, dim=-1)
-    return torch.argmax(class_probabilities, dim=-1)
+    return torch.argmax(class_probabilities, dim=-1), class_probabilities
