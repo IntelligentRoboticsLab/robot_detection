@@ -97,7 +97,7 @@ class RoboEireanData(torch.utils.data.Dataset):
         raw_image_np = np.array(image)
         image_tensor = torch.from_numpy(raw_image_np)
             
-        return transformed_image, image_tensor, target_bounding_boxes, target_classes
+        return transformed_image, image_tensor, target_bounding_boxes, target_classes, image_path
 
     def __len__(self):
         return len(self.images)
