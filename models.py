@@ -136,7 +136,7 @@ class MultiClassJetNet(pl.LightningModule):
     def training_step(
         self, batch: tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor], _
     ):
-        image, encoded_target_boxes, target_is_object, encoded_target_classes = batch
+        image, encoded_target_boxes, target_is_object, encoded_target_classes, _ = batch
         encoded_predicted_boxes, predicted_class_logits = self(image)
         mined_classification_loss, location_loss = self.bounding_box_loss(
             encoded_target_boxes,
@@ -149,9 +149,7 @@ class MultiClassJetNet(pl.LightningModule):
             accuracy = self.accuracy(
                 predicted_class_logits, encoded_target_classes.flatten()
             )
-        # print(predicted_class_logits)
-        # print(encoded_target_classes)
-        # print("--------------")
+
         self.log("train/accuracy/no_object", accuracy[0])
         self.log(
             f"train/accuracy/robot",
@@ -164,7 +162,7 @@ class MultiClassJetNet(pl.LightningModule):
     def validation_step(
         self, batch: tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor], _
     ):
-        image, encoded_target_boxes, target_is_object, encoded_target_classes = batch
+        image, encoded_target_boxes, target_is_object, encoded_target_classes, _ = batch
         encoded_predicted_boxes, predicted_class_logits = self(image)
         mined_classification_loss, location_loss = self.bounding_box_loss(
             encoded_target_boxes,
@@ -194,8 +192,11 @@ class MultiClassJetNet(pl.LightningModule):
         predicted_class_logits: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         selected_predicted_boxes = predicted_boxes[target_is_object]
+        print("selected predicted boxes is: ", selected_predicted_boxes)
         selected_target_boxes = target_boxes[target_is_object]
+        print("selected target boxes is: ", selected_target_boxes)
         number_of_positive = selected_predicted_boxes.size(0)
+        print("number of positive is: ", number_of_positive)
         if number_of_positive > 0:
             location_loss = (
                 F.smooth_l1_loss(
