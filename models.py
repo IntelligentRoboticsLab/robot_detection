@@ -25,7 +25,7 @@ class ObjectDetectionTask(lightning.LightningModule):
 
 
     def _shared_eval_step(self, batch):
-        images, _, encoded_target_bounding_boxes, encoded_target_classes, _ = batch.to('cuda:0')
+        images, _, encoded_target_bounding_boxes, encoded_target_classes, _ = batch
         (
             encoded_predicted_bounding_boxes,
             encoded_predicted_class_logits,

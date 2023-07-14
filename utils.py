@@ -39,7 +39,7 @@ def convert_to_absolute_coordinates(
 
     bounding_boxes = bounding_boxes * torch.tensor(
         [image_size[1], image_size[0], image_size[1], image_size[0]]
-    ) .to("cuda:0")
+    )#.to("cuda:0")
     bounding_boxes = torch.concat(
         (
             bounding_boxes[:, :, :2] - bounding_boxes[:, :, 2:] / 2,
@@ -115,9 +115,9 @@ class Encoder:
         encoded_target_boxes = torch.zeros(
             (self.default_boxes_xy_wh.size(0), NUM_BOX_PARAMETERS)
         )
-        selected_target_boxes = selected_target_boxes.to("cuda:0")
-        selected_default_boxes = selected_default_boxes.to("cuda:0")
-        encoded_target_boxes = encoded_target_boxes.to("cuda:0")
+        selected_target_boxes = selected_target_boxes#.to("cuda:0")
+        selected_default_boxes = selected_default_boxes#.to("cuda:0")
+        encoded_target_boxes = encoded_target_boxes#.to("cuda:0")
 
         encoded_target_boxes = encoded_target_boxes.double()
         selected_default_boxes = selected_default_boxes.double()
@@ -140,7 +140,7 @@ class Encoder:
         """
         assert bounding_boxes.dim() == 3
         decoded_boxes = torch.zeros_like(bounding_boxes)
-        self.default_boxes_xy_wh = self.default_boxes_xy_wh.to("cuda:0")
+        self.default_boxes_xy_wh = self.default_boxes_xy_wh#.to("cuda:0")
         decoded_boxes[..., 0:2] = (
             self.default_boxes_xy_wh[:, 2:4] * (bounding_boxes[..., 0:2])
             + self.default_boxes_xy_wh[:, 0:2]
