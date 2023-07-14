@@ -1,10 +1,12 @@
-from utils import Encoder
+import os
 import torch
-from datasets import RoboEireanDataModule
 import lightning.pytorch as pl
-
-from models import JetNet, SingleShotDetector, ObjectDetectionTask
 from lightning.pytorch.loggers import TensorBoardLogger
+
+from utils import Encoder
+from datasets import RoboEireanDataModule
+from models import JetNet, SingleShotDetector, ObjectDetectionTask
+
 
 if __name__ == "__main__":
     LEARNING_RATE = 1e-3
@@ -25,10 +27,27 @@ if __name__ == "__main__":
     loss = SingleShotDetector(ALPHA)
     data_module = RoboEireanDataModule("data/raw/", encoder, 128)
     data_module.setup("fit")
-    task = ObjectDetectionTask(model, loss, encoder, LEARNING_RATE)
-    
-    # view logs with tensorboard --logdir new_logs
-    
+
+    CHECKPOINT = True
+
+    if CHECKPOINT:
+
+        VERSION = 98
+
+        checkpoint = os.listdir(f"new_logs/lightning_logs/version_{VERSION}/checkpoints")[0]
+        checkpoint_path = f"new_logs/lightning_logs/version_{VERSION}/checkpoints/{checkpoint}"
+        print(checkpoint_path)
+
+        task = ObjectDetectionTask.load_from_checkpoint(
+            checkpoint_path=checkpoint_path,
+            model=model,
+            loss=loss,
+            encoder=encoder,
+            learning_rate=LEARNING_RATE)
+
+    else:
+        task = ObjectDetectionTask(model, loss, encoder, LEARNING_RATE)
+
     logger = TensorBoardLogger(save_dir="new_logs")
     trainer = pl.Trainer(max_epochs=200, logger=logger)
     trainer.fit(model=task, datamodule=data_module)
