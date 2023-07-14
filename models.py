@@ -94,10 +94,8 @@ class ObjectDetectionTask(lightning.LightningModule):
         return total_loss
 
     def on_train_epoch_end(self):
-        with torch.no_grad():
-            calculated_map = self.mean_average_precision.compute()["map"]
         self.log(
-            "train/mean_average_precision", calculated_map
+            "train/mean_average_precision", self.mean_average_precision.compute()["map"]
         )
 
     def validation_step(self, batch, batch_idx):
@@ -157,20 +155,18 @@ class SingleShotDetector(nn.Module):
         target_is_object = target_classes > 0
         # TODO: Check this. Sum over the whole batch instead of each image
         number_of_positive = target_is_object.sum()
-        # number_of_positive = number_of_positive.clamp(min=1)
-        # number_of_negative = number_of_positive * 3
+        number_of_positive = number_of_positive.clamp(min=1)
+        number_of_negative = number_of_positive * 3
 
-        if number_of_positive > 0:
-            location_loss = (
-                F.smooth_l1_loss(
-                    predicted_bounding_boxes[target_is_object],
-                    target_bounding_boxes[target_is_object],
-                    reduction="sum",
-                )
-                / number_of_positive.sum()
+
+        location_loss = (
+            F.smooth_l1_loss(
+                predicted_bounding_boxes[target_is_object],
+                target_bounding_boxes[target_is_object],
+                reduction="sum",
             )
-        else:
-            location_loss = 0.0
+            / number_of_positive.sum()
+        )
 
         batch_size, num_target_boxes, num_classes = predicted_class_logits.shape
         classification_loss = F.cross_entropy(
@@ -184,7 +180,7 @@ class SingleShotDetector(nn.Module):
         negative_classification_loss = classification_loss[~target_is_object.flatten()]
         sorted_loss, _ = negative_classification_loss.sort(descending=True)
         # Hard negative mining
-        number_of_negative = torch.clamp(torch.clamp(number_of_positive, min=1) * 3, max=sorted_loss.size(0))
+        number_of_negative = torch.clamp(number_of_negative, max=sorted_loss.size(0))
         mined_classification_loss = (
             sorted_loss[:number_of_negative].sum() + positive_classification_loss.sum()
         ) / (number_of_negative + number_of_positive.sum())
